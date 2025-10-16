@@ -2,6 +2,7 @@ import { getLatestSession, getDetectedBooksBySession, getInsightsBySession, getR
 import BookCard from '@/components/BookCard'
 import InsightCard from '@/components/InsightCard'
 import RecommendationCard from '@/components/RecommendationCard'
+import UploadSection from '@/components/UploadSection'
 import Link from 'next/link'
 
 export const revalidate = 60
@@ -19,11 +20,9 @@ export default async function HomePage() {
           <p className="text-xl text-gray-600 mb-8">
             Upload a photo of your bookshelf to get personalized reading recommendations powered by AI
           </p>
-          <div className="bg-gray-50 rounded-lg p-8 mb-8">
-            <p className="text-gray-700 mb-4">
-              No analysis sessions found yet. Start by uploading your first bookshelf photo!
-            </p>
-          </div>
+          
+          {/* Upload Section for new users */}
+          <UploadSection />
         </div>
       </div>
     )
@@ -45,6 +44,11 @@ export default async function HomePage() {
         <p className="text-xl text-gray-600">
           AI-powered insights and recommendations based on your bookshelf
         </p>
+      </div>
+      
+      {/* Upload Section for existing users */}
+      <div className="mb-12">
+        <UploadSection />
       </div>
       
       {/* Latest Session Info */}
