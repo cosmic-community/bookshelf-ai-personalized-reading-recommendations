@@ -3,9 +3,14 @@ import { cosmic } from '@/lib/cosmic'
 import OpenAI from 'openai'
 import { GenreTag } from '@/types'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Lazy-load OpenAI client to avoid build-time errors
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is required')
+  }
+  return new OpenAI({ apiKey })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +31,9 @@ export async function POST(request: NextRequest) {
     })
 
     const startTime = Date.now()
+
+    // Get OpenAI client at runtime
+    const openai = getOpenAIClient()
 
     // Use OpenAI Vision API to analyze the bookshelf image
     const response = await openai.chat.completions.create({
