@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cosmic } from '@/lib/cosmic'
 import OpenAI from 'openai'
+import { GenreTag } from '@/types'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       .find({ type: 'genre-tags' })
       .props(['id', 'title', 'slug', 'metadata'])
 
-    const genres = genresResponse.objects
+    const genres = genresResponse.objects as GenreTag[]
 
     // Helper function to map genre names to genre IDs
     const mapGenresToIds = (bookTitle: string): string[] => {
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
 
       for (const [slug, keywords] of Object.entries(genreKeywords)) {
         if (keywords.some((keyword) => lowerTitle.includes(keyword))) {
-          const genre = genres.find((g) => g.slug === slug)
+          const genre = genres.find((g: GenreTag) => g.slug === slug)
           if (genre) {
             matchedGenres.push(genre.id)
           }
@@ -134,7 +135,7 @@ export async function POST(request: NextRequest) {
 
       // Default to literary-fiction if no matches
       if (matchedGenres.length === 0) {
-        const defaultGenre = genres.find((g) => g.slug === 'literary-fiction')
+        const defaultGenre = genres.find((g: GenreTag) => g.slug === 'literary-fiction')
         if (defaultGenre) {
           matchedGenres.push(defaultGenre.id)
         }
