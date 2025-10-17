@@ -18,16 +18,24 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     // Upload to Cosmic Media Library
-    // Changed: Removed originalname and filename parameters that don't exist in InsertMediaType
-    // The Cosmic SDK uses the buffer directly with folder parameter
-    const media = await cosmic.media.insertOne({
+    // The Cosmic SDK's media.insertOne returns a response with the media object
+    const uploadResponse = await cosmic.media.insertOne({
       media: buffer,
       folder: 'bookshelf-uploads'
     })
 
-    return NextResponse.json({ media })
+    // The response structure from Cosmic SDK is { media: { name, url, imgix_url, ... } }
+    // Return the complete media object so the client can access all properties
+    return NextResponse.json({ 
+      media: uploadResponse.media 
+    })
   } catch (error) {
     console.error('Upload error:', error)
+    // Log the full error details to help debug
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
     return NextResponse.json(
       { error: 'Failed to upload image' },
       { status: 500 }

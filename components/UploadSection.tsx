@@ -61,8 +61,14 @@ export default function UploadSection() {
       const { media } = await uploadResponse.json()
       console.log('Media uploaded:', media)
 
-      // Changed: Use media.name instead of just the name
-      const mediaName = media.media?.name || media.name
+      // Changed: The Cosmic SDK returns media object with name, url, imgix_url properties
+      // Access the media name directly from the media object
+      if (!media || !media.name) {
+        throw new Error('Invalid media response from upload')
+      }
+
+      const mediaName = media.name
+      const imageUrl = media.imgix_url
 
       // Step 2: Create analysis session
       const sessionResponse = await fetch('/api/create-session', {
@@ -88,9 +94,6 @@ export default function UploadSection() {
       setAnalyzing(true)
 
       // Step 3: Trigger AI analysis
-      // Changed: Use media.media.imgix_url for the image URL
-      const imageUrl = media.media?.imgix_url || media.imgix_url
-
       const analysisResponse = await fetch('/api/analyze-bookshelf', {
         method: 'POST',
         headers: {
