@@ -6,6 +6,7 @@ export default function UploadSection() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -76,11 +77,31 @@ export default function UploadSection() {
 
       const { session } = await sessionResponse.json()
 
+      setUploading(false)
+      setAnalyzing(true)
+
+      // Step 3: Trigger AI analysis
+      const analysisResponse = await fetch('/api/analyze-bookshelf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId: session.object.id,
+          imageUrl: media.imgix_url,
+        }),
+      })
+
+      if (!analysisResponse.ok) {
+        throw new Error('Failed to analyze bookshelf')
+      }
+
       // Redirect to session page
-      window.location.href = `/sessions/${session.slug}`
+      window.location.href = `/sessions/${session.object.slug}`
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
       setUploading(false)
+      setAnalyzing(false)
     }
   }
 
@@ -93,10 +114,14 @@ export default function UploadSection() {
     }
   }
 
+  const isProcessing = uploading || analyzing
+
   return (
     <div className="glass-dark rounded-3xl shadow-glow p-8 md:p-10">
       <div className="mb-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-black mb-3 gradient-text">Get Started Now</h2>
+        <h2 className="text-3xl md:text-4xl font-black mb-3 gradient-text">
+          Get Started Now
+        </h2>
         <p className="text-gray-600 text-lg">
           Upload a photo of your bookshelf to begin your journey
         </p>
@@ -121,7 +146,7 @@ export default function UploadSection() {
               onChange={handleFileSelect}
               className="hidden"
               id="file-upload"
-              disabled={uploading}
+              disabled={isProcessing}
             />
             <label
               htmlFor="file-upload"
@@ -164,7 +189,7 @@ export default function UploadSection() {
               <div className="absolute top-4 right-4">
                 <button
                   onClick={handleClear}
-                  disabled={uploading}
+                  disabled={isProcessing}
                   className="glass-dark rounded-full p-3 shadow-lg hover:bg-white transition-all duration-200 disabled:opacity-50 group"
                   aria-label="Remove image"
                 >
@@ -187,10 +212,34 @@ export default function UploadSection() {
 
             <button
               onClick={handleUpload}
-              disabled={uploading}
+              disabled={isProcessing}
               className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white px-8 py-5 rounded-2xl font-bold text-xl hover:shadow-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shine hover:scale-[1.02]"
             >
               {uploading ? (
+                <span className="flex items-center justify-center gap-3">
+                  <svg
+                    className="animate-spin h-7 w-7"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Uploading Image...
+                </span>
+              ) : analyzing ? (
                 <span className="flex items-center justify-center gap-3">
                   <svg
                     className="animate-spin h-7 w-7"
