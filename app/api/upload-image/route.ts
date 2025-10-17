@@ -18,10 +18,12 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     // Upload to Cosmic Media Library
-    // Note: The Cosmic SDK's media.insertOne() accepts media (buffer) and folder
+    // Changed: Added proper filename and originalname parameters
     const media = await cosmic.media.insertOne({
       media: buffer,
       folder: 'bookshelf-uploads',
+      originalname: file.name,
+      filename: `bookshelf-${Date.now()}-${file.name}`
     })
 
     return NextResponse.json({ media })

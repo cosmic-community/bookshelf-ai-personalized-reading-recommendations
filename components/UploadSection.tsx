@@ -54,10 +54,15 @@ export default function UploadSection() {
       })
 
       if (!uploadResponse.ok) {
-        throw new Error('Failed to upload image')
+        const errorData = await uploadResponse.json()
+        throw new Error(errorData.error || 'Failed to upload image')
       }
 
       const { media } = await uploadResponse.json()
+      console.log('Media uploaded:', media)
+
+      // Changed: Use media.name instead of just the name
+      const mediaName = media.media?.name || media.name
 
       // Step 2: Create analysis session
       const sessionResponse = await fetch('/api/create-session', {
@@ -66,21 +71,26 @@ export default function UploadSection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mediaName: media.name,
+          mediaName: mediaName,
           userId: 'user_' + Date.now(),
         }),
       })
 
       if (!sessionResponse.ok) {
-        throw new Error('Failed to create analysis session')
+        const errorData = await sessionResponse.json()
+        throw new Error(errorData.error || 'Failed to create analysis session')
       }
 
       const { session } = await sessionResponse.json()
+      console.log('Session created:', session)
 
       setUploading(false)
       setAnalyzing(true)
 
       // Step 3: Trigger AI analysis
+      // Changed: Use media.media.imgix_url for the image URL
+      const imageUrl = media.media?.imgix_url || media.imgix_url
+
       const analysisResponse = await fetch('/api/analyze-bookshelf', {
         method: 'POST',
         headers: {
@@ -88,17 +98,19 @@ export default function UploadSection() {
         },
         body: JSON.stringify({
           sessionId: session.object.id,
-          imageUrl: media.imgix_url,
+          imageUrl: imageUrl,
         }),
       })
 
       if (!analysisResponse.ok) {
-        throw new Error('Failed to analyze bookshelf')
+        const errorData = await analysisResponse.json()
+        throw new Error(errorData.error || 'Failed to analyze bookshelf')
       }
 
       // Redirect to session page
       window.location.href = `/sessions/${session.object.slug}`
     } catch (err) {
+      console.error('Upload error:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
       setUploading(false)
       setAnalyzing(false)
