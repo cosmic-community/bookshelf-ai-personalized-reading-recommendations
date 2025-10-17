@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
   try {
     const { sessionId, imageUrl } = await request.json()
 
+    console.log('Analyze bookshelf request:', { sessionId, imageUrl })
+
     if (!sessionId || !imageUrl) {
       return NextResponse.json(
         { error: 'Session ID and image URL are required' },
@@ -14,6 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update session status to processing
+    console.log('Updating session status to Processing...')
     await cosmic.objects.updateOne(sessionId, {
       metadata: {
         ai_analysis_status: 'Processing',
@@ -64,6 +67,7 @@ Return your response as a valid JSON object with this exact structure:
 Important: Return ONLY the JSON object, no additional text.`
 
     // Call Cosmic AI API
+    console.log('Calling Cosmic AI API...')
     const cosmicAIResponse = await fetch('https://api.cosmicjs.com/v3/ai/prompt', {
       method: 'POST',
       headers: {
@@ -77,11 +81,16 @@ Important: Return ONLY the JSON object, no additional text.`
       }),
     })
 
+    console.log('Cosmic AI response status:', cosmicAIResponse.status)
+
     if (!cosmicAIResponse.ok) {
+      const errorText = await cosmicAIResponse.text()
+      console.error('Cosmic AI error response:', errorText)
       throw new Error(`Cosmic AI request failed: ${cosmicAIResponse.statusText}`)
     }
 
     const cosmicAIData = await cosmicAIResponse.json()
+    console.log('Cosmic AI response received')
     const processingTime = Date.now() - startTime
 
     // Parse AI response
@@ -93,17 +102,24 @@ Important: Return ONLY the JSON object, no additional text.`
     let analysisData
     try {
       analysisData = JSON.parse(content)
+      console.log('AI analysis parsed successfully:', {
+        books: analysisData.detected_books?.length || 0,
+        insights: analysisData.insights?.length || 0,
+        recommendations: analysisData.recommendations?.length || 0
+      })
     } catch (e) {
       console.error('Failed to parse AI response:', content)
       throw new Error('Invalid AI response format')
     }
 
     // Fetch all genres for mapping
+    console.log('Fetching genre tags...')
     const genresResponse = await cosmic.objects
       .find({ type: 'genre-tags' })
       .props(['id', 'title', 'slug', 'metadata'])
 
     const genres = genresResponse.objects as GenreTag[]
+    console.log('Genres fetched:', genres.length)
 
     // Helper function to map genre names to genre IDs
     const mapGenresToIds = (bookTitle: string): string[] => {
@@ -165,6 +181,7 @@ Important: Return ONLY the JSON object, no additional text.`
     }
 
     // Create detected books in Cosmic
+    console.log('Creating detected books...')
     const createdBooks = []
     for (const book of analysisData.detected_books || []) {
       const coverUrl = await getBookCover(book.title, book.author)
@@ -188,8 +205,10 @@ Important: Return ONLY the JSON object, no additional text.`
 
       createdBooks.push(createdBook.object)
     }
+    console.log('Detected books created:', createdBooks.length)
 
     // Create insights in Cosmic
+    console.log('Creating insights...')
     const createdInsights = []
     for (let i = 0; i < (analysisData.insights || []).length; i++) {
       const insight = analysisData.insights[i]
@@ -209,8 +228,10 @@ Important: Return ONLY the JSON object, no additional text.`
 
       createdInsights.push(createdInsight.object)
     }
+    console.log('Insights created:', createdInsights.length)
 
     // Create recommendations in Cosmic
+    console.log('Creating recommendations...')
     const createdRecommendations = []
     for (let i = 0; i < (analysisData.recommendations || []).length; i++) {
       const rec = analysisData.recommendations[i]
@@ -237,8 +258,10 @@ Important: Return ONLY the JSON object, no additional text.`
 
       createdRecommendations.push(createdRec.object)
     }
+    console.log('Recommendations created:', createdRecommendations.length)
 
     // Update session with completion status
+    console.log('Updating session to Completed...')
     await cosmic.objects.updateOne(sessionId, {
       metadata: {
         ai_analysis_status: 'Completed',
@@ -253,6 +276,8 @@ Important: Return ONLY the JSON object, no additional text.`
       },
     })
 
+    console.log('✅ Analysis complete!')
+
     return NextResponse.json({
       success: true,
       books_detected: createdBooks.length,
@@ -260,7 +285,7 @@ Important: Return ONLY the JSON object, no additional text.`
       recommendations_created: createdRecommendations.length,
     })
   } catch (error) {
-    console.error('Analysis error:', error)
+    console.error('❌ Analysis error:', error)
 
     // Try to update session status to failed
     try {
@@ -277,7 +302,10 @@ Important: Return ONLY the JSON object, no additional text.`
     }
 
     return NextResponse.json(
-      { error: 'Failed to analyze bookshelf' },
+      { 
+        error: 'Failed to analyze bookshelf', 
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }

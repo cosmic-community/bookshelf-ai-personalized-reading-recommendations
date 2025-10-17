@@ -44,33 +44,43 @@ export default function UploadSection() {
     setError(null)
 
     try {
+      console.log('🚀 Starting upload process...')
+      
       // Step 1: Upload image to Cosmic
       const formData = new FormData()
       formData.append('file', selectedFile)
 
+      console.log('📤 Uploading image to /api/upload-image...')
       const uploadResponse = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData,
       })
 
+      console.log('Upload response status:', uploadResponse.status)
+
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json()
+        console.error('Upload failed:', errorData)
         throw new Error(errorData.error || 'Failed to upload image')
       }
 
       const { media } = await uploadResponse.json()
-      console.log('Media uploaded:', media)
+      console.log('✅ Media uploaded successfully:', media)
 
-      // Changed: The Cosmic SDK returns media object with name, url, imgix_url properties
-      // Access the media name directly from the media object
+      // Validate media response
       if (!media || !media.name) {
+        console.error('Invalid media response:', media)
         throw new Error('Invalid media response from upload')
       }
 
       const mediaName = media.name
       const imageUrl = media.imgix_url
 
+      console.log('📝 Media name:', mediaName)
+      console.log('🖼️ Image URL:', imageUrl)
+
       // Step 2: Create analysis session
+      console.log('📋 Creating analysis session...')
       const sessionResponse = await fetch('/api/create-session', {
         method: 'POST',
         headers: {
@@ -82,18 +92,22 @@ export default function UploadSection() {
         }),
       })
 
+      console.log('Session response status:', sessionResponse.status)
+
       if (!sessionResponse.ok) {
         const errorData = await sessionResponse.json()
+        console.error('Session creation failed:', errorData)
         throw new Error(errorData.error || 'Failed to create analysis session')
       }
 
       const { session } = await sessionResponse.json()
-      console.log('Session created:', session)
+      console.log('✅ Session created:', session)
 
       setUploading(false)
       setAnalyzing(true)
 
       // Step 3: Trigger AI analysis
+      console.log('🤖 Starting AI analysis...')
       const analysisResponse = await fetch('/api/analyze-bookshelf', {
         method: 'POST',
         headers: {
@@ -105,15 +119,22 @@ export default function UploadSection() {
         }),
       })
 
+      console.log('Analysis response status:', analysisResponse.status)
+
       if (!analysisResponse.ok) {
         const errorData = await analysisResponse.json()
+        console.error('Analysis failed:', errorData)
         throw new Error(errorData.error || 'Failed to analyze bookshelf')
       }
 
+      const analysisResult = await analysisResponse.json()
+      console.log('✅ Analysis complete:', analysisResult)
+
       // Redirect to session page
+      console.log('🔄 Redirecting to session page:', `/sessions/${session.object.slug}`)
       window.location.href = `/sessions/${session.object.slug}`
     } catch (err) {
-      console.error('Upload error:', err)
+      console.error('❌ Upload error:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
       setUploading(false)
       setAnalyzing(false)

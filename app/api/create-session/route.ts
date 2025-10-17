@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const { mediaName, userId } = await request.json()
 
+    console.log('Create session request:', { mediaName, userId })
+
     if (!mediaName) {
       return NextResponse.json(
         { error: 'Media name is required' },
@@ -20,12 +22,15 @@ export async function POST(request: NextRequest) {
       year: 'numeric' 
     })}`
 
+    console.log('Creating session with title:', sessionTitle)
+    console.log('Media name being saved:', mediaName)
+
     const session = await cosmic.objects.insertOne({
       title: sessionTitle,
       type: 'book-analysis-sessions',
       status: 'published',
       metadata: {
-        uploaded_image: mediaName,
+        uploaded_image: mediaName, // This should be the media name string, not an object
         user_id: userId || 'anonymous',
         ai_analysis_status: 'Pending',
         total_books_detected: 0,
@@ -39,11 +44,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('Session created successfully:', session.object.id)
+
     return NextResponse.json({ session })
   } catch (error) {
     console.error('Session creation error:', error)
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
     return NextResponse.json(
-      { error: 'Failed to create session' },
+      { error: 'Failed to create session', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
