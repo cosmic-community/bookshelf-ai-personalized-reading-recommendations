@@ -20,49 +20,31 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
 
     // Upload to Cosmic Media Library
-    // The Cosmic SDK expects the media as a Buffer with proper metadata
     console.log('Calling Cosmic media.insertOne...')
     
-    try {
-      const uploadResponse = await cosmic.media.insertOne({
-        media: {
-          buffer: buffer,
-          originalname: file.name,
-          mimetype: file.type
-        },
-        folder: 'bookshelf-uploads'
-      })
+    const uploadResponse = await cosmic.media.insertOne({
+      media: buffer,
+      folder: 'bookshelf-uploads',
+      metadata: {
+        originalname: file.name,
+        mimetype: file.type
+      }
+    })
 
-      console.log('Upload response received:', {
+    console.log('Upload response received:', {
+      name: uploadResponse.media.name,
+      url: uploadResponse.media.url,
+      imgix_url: uploadResponse.media.imgix_url
+    })
+
+    // Return the media name (for file metafield) and URLs
+    return NextResponse.json({ 
+      media: {
         name: uploadResponse.media.name,
         url: uploadResponse.media.url,
         imgix_url: uploadResponse.media.imgix_url
-      })
-
-      // Return the complete media object so the client can access all properties
-      return NextResponse.json({ 
-        media: uploadResponse.media 
-      })
-    } catch (uploadError) {
-      console.error('Cosmic upload error:', uploadError)
-      
-      // If the object format doesn't work, try direct buffer upload
-      console.log('Retrying with direct buffer...')
-      const uploadResponse = await cosmic.media.insertOne({
-        media: buffer,
-        folder: 'bookshelf-uploads'
-      })
-
-      console.log('Upload response received:', {
-        name: uploadResponse.media.name,
-        url: uploadResponse.media.url,
-        imgix_url: uploadResponse.media.imgix_url
-      })
-
-      return NextResponse.json({ 
-        media: uploadResponse.media 
-      })
-    }
+      }
+    })
   } catch (error) {
     console.error('Upload error:', error)
     // Log the full error details to help debug

@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Create a new book analysis session
-    const timestamp = new Date().toISOString()
     const sessionTitle = `Bookshelf Scan - ${new Date().toLocaleDateString('en-US', { 
       month: 'long',
       day: 'numeric', 
@@ -25,12 +24,13 @@ export async function POST(request: NextRequest) {
     console.log('Creating session with title:', sessionTitle)
     console.log('Media name being saved:', mediaName)
 
+    // For Cosmic file metafields, we need to pass just the media name string
     const session = await cosmic.objects.insertOne({
       title: sessionTitle,
       type: 'book-analysis-sessions',
       status: 'published',
       metadata: {
-        uploaded_image: mediaName, // This should be the media name string, not an object
+        uploaded_image: mediaName, // Just the media name string for file metafield
         user_id: userId || 'anonymous',
         ai_analysis_status: 'Pending',
         total_books_detected: 0,

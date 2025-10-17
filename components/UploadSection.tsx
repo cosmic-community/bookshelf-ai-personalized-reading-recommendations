@@ -74,7 +74,7 @@ export default function UploadSection() {
       }
 
       const mediaName = media.name
-      const imageUrl = media.imgix_url
+      const imageUrl = media.imgix_url || media.url
 
       console.log('📝 Media name:', mediaName)
       console.log('🖼️ Image URL:', imageUrl)
@@ -87,7 +87,7 @@ export default function UploadSection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mediaName: mediaName,
+          mediaName: mediaName, // Pass just the media name string
           userId: 'user_' + Date.now(),
         }),
       })
