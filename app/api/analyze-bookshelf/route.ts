@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cosmic } from '@/lib/cosmic'
-import OpenAI from 'openai'
 import { GenreTag } from '@/types'
-
-// Lazy-load OpenAI client to avoid build-time errors
-function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is required')
-  }
-  return new OpenAI({ apiKey })
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,76 +22,72 @@ export async function POST(request: NextRequest) {
 
     const startTime = Date.now()
 
-    // Get OpenAI client at runtime
-    const openai = getOpenAIClient()
+    // Use Cosmic AI to analyze the bookshelf image
+    const prompt = `Analyze this bookshelf image and identify all visible books. For each book, provide:
+1. Book title (exact as shown on spine)
+2. Author name
+3. ISBN (if visible)
+4. Your confidence score (0-100)
 
-    // Use OpenAI Vision API to analyze the bookshelf image
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Analyze this bookshelf image and identify all visible books. For each book, provide:
-              1. Book title (exact as shown on spine)
-              2. Author name
-              3. ISBN (if visible)
-              4. Your confidence score (0-100)
-              
-              Then provide:
-              - 2-3 collection insights about reading patterns, genre diversity, or publication eras
-              - 3 personalized book recommendations based on the detected collection
-              
-              Return your response as a valid JSON object with this exact structure:
-              {
-                "detected_books": [
-                  {
-                    "title": "Book Title",
-                    "author": "Author Name",
-                    "isbn": "ISBN or null",
-                    "confidence_score": 85
-                  }
-                ],
-                "insights": [
-                  {
-                    "type": "genre_breakdown",
-                    "title": "Insight Title",
-                    "description": "Detailed insight description"
-                  }
-                ],
-                "recommendations": [
-                  {
-                    "title": "Recommended Book Title",
-                    "author": "Author Name",
-                    "reason": "Why this book is recommended based on detected collection",
-                    "match_score": 92,
-                    "based_on_books": "Book1, Book2"
-                  }
-                ]
-              }
-              
-              Important: Return ONLY the JSON object, no additional text.`,
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: imageUrl,
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens: 4096,
+Then provide:
+- 2-3 collection insights about reading patterns, genre diversity, or publication eras
+- 3 personalized book recommendations based on the detected collection
+
+Return your response as a valid JSON object with this exact structure:
+{
+  "detected_books": [
+    {
+      "title": "Book Title",
+      "author": "Author Name",
+      "isbn": "ISBN or null",
+      "confidence_score": 85
+    }
+  ],
+  "insights": [
+    {
+      "type": "genre_breakdown",
+      "title": "Insight Title",
+      "description": "Detailed insight description"
+    }
+  ],
+  "recommendations": [
+    {
+      "title": "Recommended Book Title",
+      "author": "Author Name",
+      "reason": "Why this book is recommended based on detected collection",
+      "match_score": 92,
+      "based_on_books": "Book1, Book2"
+    }
+  ]
+}
+
+Important: Return ONLY the JSON object, no additional text.`
+
+    // Call Cosmic AI API
+    const cosmicAIResponse = await fetch('https://api.cosmicjs.com/v3/ai/prompt', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.COSMIC_WRITE_KEY}`,
+      },
+      body: JSON.stringify({
+        bucket_slug: process.env.COSMIC_BUCKET_SLUG,
+        prompt,
+        images: [imageUrl],
+      }),
     })
 
+    if (!cosmicAIResponse.ok) {
+      throw new Error(`Cosmic AI request failed: ${cosmicAIResponse.statusText}`)
+    }
+
+    const cosmicAIData = await cosmicAIResponse.json()
     const processingTime = Date.now() - startTime
 
     // Parse AI response
-    const content = response.choices[0]?.message?.content
+    const content = cosmicAIData.response
     if (!content) {
-      throw new Error('No response from AI')
+      throw new Error('No response from Cosmic AI')
     }
 
     let analysisData
@@ -259,7 +245,7 @@ export async function POST(request: NextRequest) {
         total_books_detected: createdBooks.length,
         analysis_metadata: {
           processing_time_ms: processingTime,
-          ai_model: 'gpt-4o',
+          ai_model: 'cosmic-ai',
           confidence_threshold: 75,
           image_resolution: '1920x1080',
           detection_method: 'spine_text_recognition',

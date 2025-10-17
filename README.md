@@ -2,12 +2,12 @@
 
 ![App Preview](https://imgix.cosmicjs.com/68249090-aad8-11f0-add1-b963a22b9c27-photo-1524995997946-a1c2e315a42f-1760650688347.jpg?w=1200&h=300&fit=crop&auto=format,compress)
 
-A modern web application that uses AI to analyze your bookshelf photos, identify your books, provide fascinating insights about your reading habits, and recommend your next great reads with direct Amazon purchase links.
+A modern web application that uses Cosmic AI to analyze your bookshelf photos, identify your books, provide fascinating insights about your reading habits, and recommend your next great reads with direct Amazon purchase links.
 
 ## ✨ Features
 
 - 📸 Upload or capture bookshelf photos for instant AI analysis
-- 🤖 Automatic book detection and identification
+- 🤖 Automatic book detection and identification powered by Cosmic AI
 - 📊 Visual insights about your reading collection (genre diversity, publication trends, etc.)
 - 🎯 Three personalized book recommendations based on your collection
 - 🛒 Direct Amazon purchase links for recommended books
@@ -46,7 +46,7 @@ The app has been tailored to work with your existing Cosmic content structure an
 - **Styling**: Tailwind CSS with custom design system
 - **CMS**: Cosmic headless CMS for content management
 - **SDK**: @cosmicjs/sdk v1.5+ for data fetching
-- **AI**: OpenAI GPT-4o Vision API for book analysis
+- **AI**: Cosmic AI for image analysis and book recommendations
 - **Image Optimization**: Imgix for responsive images
 - **Deployment**: Optimized for Vercel
 
@@ -56,7 +56,6 @@ The app has been tailored to work with your existing Cosmic content structure an
 
 - Node.js 18+ or Bun runtime
 - A Cosmic account with bucket access
-- An OpenAI API key for AI book analysis
 - Basic knowledge of Next.js and React
 
 ### Installation

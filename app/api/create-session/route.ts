@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         total_books_detected: 0,
         analysis_metadata: {
           processing_time_ms: 0,
-          ai_model: 'gpt-4-vision',
+          ai_model: 'cosmic-ai',
           confidence_threshold: 75,
           image_resolution: '1920x1080',
           detection_method: 'spine_text_recognition',
