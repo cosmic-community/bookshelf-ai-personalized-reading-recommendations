@@ -94,26 +94,26 @@ export default function UploadSection() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2">Get Started Now</h2>
-        <p className="text-gray-600">
-          Upload a photo of your bookshelf to begin
+    <div className="glass-dark rounded-3xl shadow-glow p-8 md:p-10">
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl md:text-4xl font-black mb-3 gradient-text">Get Started Now</h2>
+        <p className="text-gray-600 text-lg">
+          Upload a photo of your bookshelf to begin your journey
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-          <div className="flex items-center gap-2">
-            <span className="text-red-500 text-xl">⚠️</span>
-            <p className="text-red-700 font-medium">{error}</p>
+        <div className="mb-6 p-5 bg-red-50 border-l-4 border-red-500 rounded-2xl animate-fade-in-up">
+          <div className="flex items-center gap-3">
+            <span className="text-red-500 text-2xl">⚠️</span>
+            <p className="text-red-700 font-semibold">{error}</p>
           </div>
         </div>
       )}
 
       <div className="space-y-4">
         {!previewUrl ? (
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-primary hover:bg-primary/5 transition-all cursor-pointer">
+          <div className="border-3 border-dashed border-gray-300 rounded-2xl p-16 text-center hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-300 cursor-pointer group">
             <input
               ref={fileInputRef}
               type="file"
@@ -127,9 +127,9 @@ export default function UploadSection() {
               htmlFor="file-upload"
               className="cursor-pointer flex flex-col items-center"
             >
-              <div className="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4">
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <svg
-                  className="w-10 h-10 text-primary"
+                  className="w-12 h-12 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -137,39 +137,39 @@ export default function UploadSection() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                   />
                 </svg>
               </div>
-              <span className="text-xl font-semibold text-gray-900 mb-2">
+              <span className="text-2xl font-bold text-gray-900 mb-3">
                 Click to upload your bookshelf photo
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-base text-gray-500 mb-2">
                 or drag and drop
               </span>
-              <span className="text-xs text-gray-400 mt-2">
+              <span className="text-sm text-gray-400 mt-1">
                 PNG, JPG, WEBP up to 10MB
               </span>
             </label>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="relative rounded-xl overflow-hidden border-2 border-gray-200">
+          <div className="space-y-5">
+            <div className="relative rounded-2xl overflow-hidden border-2 border-purple-200 shadow-xl">
               <img
                 src={previewUrl}
                 alt="Preview of your bookshelf"
-                className="w-full h-80 object-cover"
+                className="w-full h-96 object-cover"
               />
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-4 right-4">
                 <button
                   onClick={handleClear}
                   disabled={uploading}
-                  className="bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                  className="glass-dark rounded-full p-3 shadow-lg hover:bg-white transition-all duration-200 disabled:opacity-50 group"
                   aria-label="Remove image"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-600"
+                    className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -177,7 +177,7 @@ export default function UploadSection() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
@@ -188,12 +188,12 @@ export default function UploadSection() {
             <button
               onClick={handleUpload}
               disabled={uploading}
-              className="w-full bg-gradient-to-r from-primary to-secondary text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white px-8 py-5 rounded-2xl font-bold text-xl hover:shadow-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shine hover:scale-[1.02]"
             >
               {uploading ? (
                 <span className="flex items-center justify-center gap-3">
                   <svg
-                    className="animate-spin h-6 w-6"
+                    className="animate-spin h-7 w-7"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -215,8 +215,8 @@ export default function UploadSection() {
                   Analyzing Your Books...
                 </span>
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <span>🚀</span>
+                <span className="flex items-center justify-center gap-3">
+                  <span className="text-2xl">🚀</span>
                   Analyze My Bookshelf
                 </span>
               )}
@@ -225,17 +225,29 @@ export default function UploadSection() {
         )}
       </div>
 
-      <div className="mt-6 flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-        <span className="text-2xl flex-shrink-0">💡</span>
+      <div className="mt-8 flex items-start gap-4 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100">
+        <span className="text-3xl flex-shrink-0">💡</span>
         <div>
-          <p className="text-sm font-medium text-blue-900 mb-1">
-            Tips for the best results:
+          <p className="text-sm font-bold text-blue-900 mb-3 uppercase tracking-wide">
+            Tips for the best results
           </p>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Ensure book spines are clearly visible and readable</li>
-            <li>• Use good lighting without glare or shadows</li>
-            <li>• Capture as many books as possible in one photo</li>
-            <li>• Hold camera steady for a sharp, clear image</li>
+          <ul className="text-sm text-blue-800 space-y-2 leading-relaxed">
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-0.5">✓</span>
+              <span>Ensure book spines are clearly visible and readable</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-0.5">✓</span>
+              <span>Use good lighting without glare or shadows</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-0.5">✓</span>
+              <span>Capture as many books as possible in one photo</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-0.5">✓</span>
+              <span>Hold camera steady for a sharp, clear image</span>
+            </li>
           </ul>
         </div>
       </div>

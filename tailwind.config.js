@@ -8,9 +8,9 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#805AD5',
-          light: '#9F7AEA',
-          dark: '#6B46C1',
+          DEFAULT: '#667eea',
+          light: '#818cf8',
+          dark: '#5b21b6',
         },
         secondary: {
           DEFAULT: '#4299E1',
@@ -18,13 +18,33 @@ module.exports = {
           dark: '#3182CE',
         },
         accent: {
-          DEFAULT: '#D53F8C',
-          light: '#ED64A6',
-          dark: '#B83280',
+          DEFAULT: '#ec4899',
+          light: '#f472b6',
+          dark: '#db2777',
         },
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      },
+      animation: {
+        'float': 'float 6s ease-in-out infinite',
+        'fade-in-up': 'fadeInUp 0.6s ease-out',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        fadeInUp: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(30px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
       },
     },
   },
